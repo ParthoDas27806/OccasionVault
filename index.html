@@ -105,9 +105,22 @@
       </div>
 
       <div id="list-section" style="padding:0 24px;">
-        <div id="empty-state" style="text-align:center; padding:70px 0 60px; display:none;">
+        <div id="empty-state" style="text-align:center; padding:40px 20px 40px; display:none;">
           <div style="font-size:4.5rem; margin-bottom:14px;">🎂🎈</div>
-          <div style="font-size:1.05rem; color:#fff; font-weight:600; text-shadow:0 2px 12px #ff6b6b44;">No birthdays yet.<br/><span style="color:#ffc312;">Log in to add someone!</span></div>
+          <div style="font-size:1.05rem; color:#fff; font-weight:600; text-shadow:0 2px 12px #ff6b6b44; margin-bottom:24px;">No birthdays yet.<br/><span style="color:#ffc312;">Log in to add someone!</span></div>
+          <div id="guest-preview" style="display:none;">
+            <div style="background:linear-gradient(135deg,rgba(255,107,107,0.12),rgba(72,219,251,0.08));border:1px solid rgba(255,107,107,0.2);border-radius:20px;padding:24px;margin-bottom:16px;text-align:left;">
+              <div style="font-size:0.7rem;color:#ff6b6b;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;font-weight:600;">✨ What you can do</div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:1.4rem;">🎂</span><div><div style="font-size:0.9rem;font-weight:600;">Never miss a birthday</div><div style="font-size:0.78rem;color:#888;">Get reminders days before</div></div></div>
+                <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:1.4rem;">☁️</span><div><div style="font-size:0.9rem;font-weight:600;">Sync across all devices</div><div style="font-size:0.78rem;color:#888;">Login once, access everywhere</div></div></div>
+                <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:1.4rem;">🔔</span><div><div style="font-size:0.9rem;font-weight:600;">Custom reminder times</div><div style="font-size:0.78rem;color:#888;">Set exact time to be notified</div></div></div>
+                <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:1.4rem;">♑</span><div><div style="font-size:0.9rem;font-weight:600;">Zodiac signs shown</div><div style="font-size:0.78rem;color:#888;">Auto-detected from birthday</div></div></div>
+              </div>
+            </div>
+            <button class="btn" onclick="openAuthModal()" style="width:100%;background:linear-gradient(135deg,#ff6b6b,#ff9f43);color:#fff;padding:14px;font-size:1rem;font-weight:bold;border-radius:14px;margin-bottom:10px;">🚀 Get Started — Login Free</button>
+            <button class="btn" onclick="handleGuestLogin()" style="width:100%;background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.15);color:#aaa;padding:11px;font-size:0.85rem;border-radius:12px;">👤 Try as Guest</button>
+          </div>
         </div>
         <div id="upcoming-list"></div>
       </div>
@@ -172,7 +185,7 @@
           <div id="detail-name" class="shimmer-text" style="font-size:1.8rem; font-weight:bold; letter-spacing:-0.02em;"></div>
           <div id="detail-date" style="font-size:0.85rem; color:#888; margin-top:6px;"></div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
           <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px 14px;">
             <div style="font-size:0.65rem; color:#666; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Days Away</div>
             <div id="detail-days" style="font-weight:600; font-size:0.95rem;"></div>
@@ -180,6 +193,10 @@
           <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px 14px;">
             <div style="font-size:0.65rem; color:#666; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Remind Before</div>
             <div id="detail-remind" style="font-weight:600; font-size:0.95rem;"></div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px 14px;">
+            <div style="font-size:0.65rem; color:#666; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Remind At</div>
+            <div id="detail-remind-time" style="font-weight:600; font-size:0.95rem;"></div>
           </div>
         </div>
         <div id="detail-note-wrap" style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px 14px; margin-bottom:16px; font-size:0.85rem; color:#aaa; display:none;"></div>
@@ -228,6 +245,10 @@
           <label class="label-style" id="remind-label">Remind me — 7 days before</label>
           <input type="range" id="form-remind" min="1" max="30" value="7" oninput="updateRemindLabel()" style="width:100%; accent-color:#ff6b6b;" />
           <div style="display:flex; justify-content:space-between; font-size:0.65rem; color:#555; margin-top:2px;"><span>1 day</span><span>30 days</span></div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label class="label-style">Reminder Time (what time to notify you)</label>
+          <input type="time" id="form-remind-time" value="09:00" style="width:100%; background:#1a1a22; border:1px solid rgba(255,255,255,0.08); color:#e8e0d5; border-radius:10px; padding:10px 12px; font-size:0.88rem; outline:none; color-scheme:dark;" />
         </div>
         <div id="form-error" style="color:#ff6b6b; font-size:0.8rem; margin-bottom:12px; display:none;"></div>
         <div style="display:flex; gap:10px;">
@@ -314,15 +335,30 @@
         if (next < today) next = new Date(today.getFullYear()+1, month-1, day);
         return next.getFullYear() - year;
       }
+      function formatTime(t) {
+        if (!t) return "9:00 AM";
+        const [h,m] = t.split(":").map(Number);
+        const ampm = h >= 12 ? "PM" : "AM";
+        const hour = h % 12 || 12;
+        return `${hour}:${String(m).padStart(2,"0")} ${ampm}`;
+      }
       function categoryColor(days) {
         if (days===0) return "#FF6B6B"; if (days<=3) return "#FF9F43";
         if (days<=7) return "#FFC312";  if (days<=30) return "#A3CB38";
         return "#48dbfb";
       }
       function zodiacSign(month, day) {
-        const s=[{n:"♑",e:[1,19]},{n:"♒",e:[2,18]},{n:"♓",e:[3,20]},{n:"♈",e:[4,19]},{n:"♉",e:[5,20]},{n:"♊",e:[6,20]},{n:"♋",e:[7,22]},{n:"♌",e:[8,22]},{n:"♍",e:[9,22]},{n:"♎",e:[10,22]},{n:"♏",e:[11,21]},{n:"♐",e:[12,21]},{n:"♑",e:[12,31]}];
-        for(const x of s) if(month<x.e[0]||(month===x.e[0]&&day<=x.e[1])) return x.n;
-        return "";
+        const s=[
+          {sym:"♑",name:"Capricorn",e:[1,19]},{sym:"♒",name:"Aquarius",e:[2,18]},
+          {sym:"♓",name:"Pisces",e:[3,20]},{sym:"♈",name:"Aries",e:[4,19]},
+          {sym:"♉",name:"Taurus",e:[5,20]},{sym:"♊",name:"Gemini",e:[6,20]},
+          {sym:"♋",name:"Cancer",e:[7,22]},{sym:"♌",name:"Leo",e:[8,22]},
+          {sym:"♍",name:"Virgo",e:[9,22]},{sym:"♎",name:"Libra",e:[10,22]},
+          {sym:"♏",name:"Scorpio",e:[11,21]},{sym:"♐",name:"Sagittarius",e:[12,21]},
+          {sym:"♑",name:"Capricorn",e:[12,31]}
+        ];
+        for(const x of s) if(month<x.e[0]||(month===x.e[0]&&day<=x.e[1])) return {sym:x.sym,name:x.name};
+        return null;
       }
 
       // ════════════════════════════════════════════════════════════
@@ -369,7 +405,7 @@
           .onSnapshot(snapshot => {
             birthdays = [];
             snapshot.forEach(doc => birthdays.push({ id: doc.id, ...doc.data() }));
-            birthdays.sort((a,b) => getDaysUntil(a.month,a.day) - getDaysUntil(b.month,b.day));
+            birthdays.sort((a,b) => a.month!==b.month ? a.month-b.month : a.day-b.day);
             renderList();
             checkAndFireDailyNotifications();
           }, err => console.error("Firestore error:", err));
@@ -476,8 +512,14 @@
       }
 
       async function firestoreAdd(entry) {
-        const { id, ...data } = entry; // id will be the Firestore doc id
-        await getUserBirthdaysRef().doc(String(entry.id)).set(data);
+        const { id, ...data } = entry;
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timed out. Check Firestore is created in Firebase Console.")), 10000)
+        );
+        await Promise.race([
+          getUserBirthdaysRef().doc(String(entry.id)).set(data),
+          timeoutPromise
+        ]);
       }
 
       async function firestoreDelete(id) {
@@ -492,7 +534,7 @@
         // For guests, data comes from localStorage
         if (isGuest) {
           birthdays = JSON.parse(localStorage.getItem(GUEST_KEY) || "[]");
-          birthdays.sort((a,b) => getDaysUntil(a.month,a.day) - getDaysUntil(b.month,b.day));
+          birthdays.sort((a,b) => a.month!==b.month ? a.month-b.month : a.day-b.day);
           renderList();
           checkAndFireDailyNotifications();
         }
@@ -501,7 +543,7 @@
       async function saveBirthday(entry) {
         if (isGuest || !FIREBASE_CONFIGURED) {
           birthdays.push(entry);
-          birthdays.sort((a,b) => getDaysUntil(a.month,a.day) - getDaysUntil(b.month,b.day));
+          birthdays.sort((a,b) => a.month!==b.month ? a.month-b.month : a.day-b.day);
           localStorage.setItem(GUEST_KEY, JSON.stringify(birthdays));
           renderList();
         } else {
@@ -529,6 +571,7 @@
         const appEl   = document.getElementById("app");
         appEl.style.display = "block";
 
+        const previewEl = document.getElementById("guest-preview");
         if (currentUser) {
           const name = currentUser.displayName || currentUser.email || "User";
           authBtn.textContent = `🚪 Logout (${name.split(" ")[0]})`;
@@ -536,12 +579,14 @@
           authBtn.style.background = "rgba(255,100,100,0.1)";
           authBtn.style.color = "#FF6B6B";
           fabBtn.style.display = "flex";
+          if (previewEl) previewEl.style.display = "none";
         } else {
           authBtn.textContent = "👤 Login";
           authBtn.onclick = openAuthModal;
           authBtn.style.background = "rgba(255,255,255,0.06)";
           authBtn.style.color = "#e8e0d5";
           fabBtn.style.display = "none";
+          if (previewEl) previewEl.style.display = "block";
         }
       }
 
@@ -653,14 +698,14 @@
 
         document.getElementById("empty-state").style.display = (upcoming.length===0&&todayB.length===0) ? "block" : "none";
         document.getElementById("upcoming-list").innerHTML = upcoming.map((b,i)=>{
-          const days=getDaysUntil(b.month,b.day), color=categoryColor(days), zodiac=zodiacSign(b.month,b.day);
+          const days=getDaysUntil(b.month,b.day), color=categoryColor(days), zodiac=zodiacSign(b.month,b.day), daysUntil=getDaysUntil(b.month,b.day);
           return `<div class="card-hover" onclick="openDetail(${b.id})"
             style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-left:3px solid ${color};border-radius:14px;padding:14px 16px;margin-bottom:10px;animation:fadeIn 0.4s ${i*.05}s both;">
             <span style="font-size:1.6rem;flex-shrink:0;">${b.emoji}</span>
             <div style="flex:1;min-width:0;">
               <div style="display:flex;align-items:center;gap:6px;">
                 <span style="font-weight:600;font-size:0.95rem;">${b.name}</span>
-                ${zodiac?`<span style="opacity:0.5;font-size:0.85em;">${zodiac}</span>`:""}
+                ${zodiac?`<span style="background:rgba(255,255,255,0.07);border-radius:6px;padding:1px 7px;font-size:0.72em;color:#aaa;margin-left:2px;">${zodiac.sym} ${zodiac.name}</span>`:""}
               </div>
               <div style="font-size:0.75rem;color:#888;margin-top:2px;">
                 ${MONTHS[b.month-1]} ${b.day}${b.year?`, ${b.year}`:""}${b.year?` · turning ${getUpcomingAge(parseInt(b.year),b.month,b.day)}`:""}
@@ -691,6 +736,8 @@
         const noteWrap = document.getElementById("detail-note-wrap");
         noteWrap.style.display = b.note ? "block" : "none";
         noteWrap.textContent = b.note ? `📝 ${b.note}` : "";
+        const rtEl = document.getElementById("detail-remind-time");
+        if (rtEl) rtEl.textContent = b.remindTime ? formatTime(b.remindTime) : "9:00 AM";
         document.getElementById("detail-modal").style.display = "flex";
         document.getElementById("fab").style.display = "none";
       }
@@ -746,7 +793,8 @@
         document.getElementById("form-name").value="";
         document.getElementById("form-year").value="";
         document.getElementById("form-note").value="";
-        document.getElementById("form-remind").value="7"; updateRemindLabel(); clearError();
+        document.getElementById("form-remind").value="7"; updateRemindLabel();
+        document.getElementById("form-remind-time").value="09:00"; clearError();
         document.getElementById("add-modal").style.display="flex";
         document.getElementById("fab").style.display="none";
       }
@@ -770,14 +818,15 @@
         if (!name) { showError("Name is required"); return; }
 
         const entry = {
-          id:     Date.now(),
+          id:         Date.now(),
           name,
-          month:  parseInt(document.getElementById("form-month").value),
-          day:    parseInt(document.getElementById("form-day").value),
-          year:   document.getElementById("form-year").value.trim(),
-          note:   document.getElementById("form-note").value.trim(),
-          remind: parseInt(document.getElementById("form-remind").value),
-          emoji:  selectedEmoji,
+          month:      parseInt(document.getElementById("form-month").value),
+          day:        parseInt(document.getElementById("form-day").value),
+          year:       document.getElementById("form-year").value.trim(),
+          note:       document.getElementById("form-note").value.trim(),
+          remind:     parseInt(document.getElementById("form-remind").value),
+          remindTime: document.getElementById("form-remind-time").value || "09:00",
+          emoji:      selectedEmoji,
         };
 
         const submitBtn = document.getElementById("add-submit-btn");
@@ -797,7 +846,17 @@
           }, 450);
         } catch(e) {
           submitBtn.textContent="Error – retry"; submitBtn.disabled=false;
-          showError("Failed to save. Check your connection.");
+          let msg = "Failed to save. ";
+          if (e.message && e.message.includes("timeout")) {
+            msg = "Timed out! Make sure Firestore Database is created in Firebase Console (Build → Firestore Database → Create database).";
+          } else if (e.code === "permission-denied") {
+            msg = "Permission denied. Go to Firestore → Rules and set them to test mode.";
+          } else if (e.code === "unavailable") {
+            msg = "No internet connection. Try again.";
+          } else {
+            msg = "Error: " + (e.message || e.code || "unknown");
+          }
+          showError(msg);
         }
       }
 
