@@ -170,13 +170,38 @@
     .notif-banner{background:linear-gradient(135deg,rgba(255,209,102,0.12),rgba(255,159,67,0.08));border:1px solid rgba(255,209,102,0.25);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin:12px 20px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
     .notif-banner:hover{background:rgba(255,209,102,0.15);}
     #confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:200;display:none;}
+    /* Profile modal */
+    .profile-avatar-large{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#fff;margin:0 auto 12px;box-shadow:0 4px 24px rgba(124,107,255,0.4);border:3px solid rgba(255,255,255,0.15);}
+    .profile-stat{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+    .profile-stat-num{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .profile-stat-label{font-size:0.72rem;color:var(--muted);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+    .profile-action{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+    .profile-action:hover{background:rgba(255,255,255,0.06);}
+    .profile-action-icon{font-size:1.2rem;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    /* Monthly recurring tag */
+    .monthly-badge{background:rgba(6,214,160,0.12);color:#06d6a0;border-radius:6px;padding:2px 7px;font-size:0.68rem;font-weight:700;}
   </style>
 </head>
 <body>
 
 <!-- LOADING -->
 <div id="loading-overlay">
-  <div style="font-size:3.5rem;filter:drop-shadow(0 4px 24px rgba(124,107,255,0.6));margin-bottom:4px;">🗓️</div>
+  <svg width="72" height="72" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 24px rgba(124,107,255,0.6));margin-bottom:4px;">
+      <defs>
+        <linearGradient id="llg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6bff"/><stop offset="100%" stop-color="#ff6b9d"/></linearGradient>
+        <linearGradient id="llg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#ff9f43"/></linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="13" fill="url(#llg1)"/>
+      <rect x="8" y="14" width="32" height="26" rx="5" fill="none" stroke="#fff" stroke-width="2.2"/>
+      <line x1="8" y1="22" x2="40" y2="22" stroke="#fff" stroke-width="2" opacity="0.5"/>
+      <rect x="16" y="9" width="4" height="9" rx="2" fill="url(#llg2)"/>
+      <rect x="28" y="9" width="4" height="9" rx="2" fill="url(#llg2)"/>
+      <circle cx="17" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+      <circle cx="24" cy="30" r="2.5" fill="#ffd166"/>
+      <circle cx="31" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+      <circle cx="17" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+      <circle cx="24" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+    </svg>
   <div class="spinner"></div>
   <div style="color:var(--muted);font-size:0.85rem;margin-top:8px;">Loading OccasionVault…</div>
 </div>
@@ -189,7 +214,24 @@
     <!-- Left -->
     <div class="login-left">
       <div class="login-logo">
-        <div class="login-logo-icon">🗓️</div>
+        <div class="login-logo-icon" style="background:none;padding:0;overflow:hidden;">
+  <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6bff"/><stop offset="100%" stop-color="#ff6b9d"/></linearGradient>
+      <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#ff9f43"/></linearGradient>
+    </defs>
+    <rect width="48" height="48" rx="13" fill="url(#lg1)"/>
+    <rect x="8" y="14" width="32" height="26" rx="5" fill="none" stroke="#fff" stroke-width="2.2"/>
+    <line x1="8" y1="22" x2="40" y2="22" stroke="#fff" stroke-width="2" opacity="0.5"/>
+    <rect x="16" y="9" width="4" height="9" rx="2" fill="url(#lg2)"/>
+    <rect x="28" y="9" width="4" height="9" rx="2" fill="url(#lg2)"/>
+    <circle cx="17" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+    <circle cx="24" cy="30" r="2.5" fill="#ffd166"/>
+    <circle cx="31" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+    <circle cx="17" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="24" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+  </svg>
+</div>
         <div>
           <div class="login-logo-name">OccasionVault</div>
           <div style="font-size:0.68rem;color:var(--muted);">Never Miss a Moment</div>
@@ -217,7 +259,7 @@
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.7 2.2 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.4l7.9 6.1C12.5 13.1 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.1z"/><path fill="#FBBC05" d="M10.6 28.5c-.5-1.5-.8-3.1-.8-4.8s.3-3.3.8-4.8l-7.9-6.1C1 15.9 0 19.8 0 24s1 8.1 2.7 11.5l7.9-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.6-5.9c-2 1.4-4.6 2.2-7.6 2.2-6.2 0-11.5-3.6-13.4-9l-7.9 6C6.7 42.6 14.7 48 24 48z"/></svg>
         Continue with Google
       </button>
-      <button class="guest-btn" onclick="handleGuestLogin()">👤 Continue as Guest (data stays on this device)</button>
+      <button class="guest-btn" onclick="handleGuestLogin()">👤 Continue as Guest</button>
       <div class="login-toggle" id="login-toggle-text">
         Don't have an account? <span onclick="toggleAuthMode(true)">Sign Up</span>
       </div>
@@ -225,7 +267,24 @@
     <!-- Right -->
     <div class="login-right">
       <div class="login-illus">
-        <div class="login-illus-icon">🗓️</div>
+        <div class="login-illus-icon">
+  <svg width="80" height="80" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 8px 32px rgba(124,107,255,0.6))">
+    <defs>
+      <linearGradient id="ilg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6bff"/><stop offset="100%" stop-color="#ff6b9d"/></linearGradient>
+      <linearGradient id="ilg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#ff9f43"/></linearGradient>
+    </defs>
+    <rect width="48" height="48" rx="13" fill="url(#ilg1)"/>
+    <rect x="8" y="14" width="32" height="26" rx="5" fill="none" stroke="#fff" stroke-width="2.2"/>
+    <line x1="8" y1="22" x2="40" y2="22" stroke="#fff" stroke-width="2" opacity="0.5"/>
+    <rect x="16" y="9" width="4" height="9" rx="2" fill="url(#ilg2)"/>
+    <rect x="28" y="9" width="4" height="9" rx="2" fill="url(#ilg2)"/>
+    <circle cx="17" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+    <circle cx="24" cy="30" r="2.5" fill="#ffd166"/>
+    <circle cx="31" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+    <circle cx="17" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="24" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+  </svg>
+</div>
         <div class="login-illus-title">Your Life, Organised</div>
         <div class="login-illus-desc">Birthdays, anniversaries, events — all in one beautiful place. Never miss what matters.</div>
         <div class="login-features">
@@ -245,7 +304,24 @@
   <div class="app-header">
     <div class="app-header-top">
       <div class="app-logo">
-        <div class="app-logo-icon">🗓️</div>
+        <div class="app-logo-icon" style="background:none;padding:0;overflow:hidden;">
+  <svg width="38" height="38" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="alg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c6bff"/><stop offset="100%" stop-color="#ff6b9d"/></linearGradient>
+      <linearGradient id="alg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffd166"/><stop offset="100%" stop-color="#ff9f43"/></linearGradient>
+    </defs>
+    <rect width="48" height="48" rx="13" fill="url(#alg1)"/>
+    <rect x="8" y="14" width="32" height="26" rx="5" fill="none" stroke="#fff" stroke-width="2.2"/>
+    <line x1="8" y1="22" x2="40" y2="22" stroke="#fff" stroke-width="2" opacity="0.5"/>
+    <rect x="16" y="9" width="4" height="9" rx="2" fill="url(#alg2)"/>
+    <rect x="28" y="9" width="4" height="9" rx="2" fill="url(#alg2)"/>
+    <circle cx="17" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+    <circle cx="24" cy="30" r="2.5" fill="#ffd166"/>
+    <circle cx="31" cy="30" r="2.5" fill="#fff" opacity="0.9"/>
+    <circle cx="17" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="24" cy="36" r="2.5" fill="#fff" opacity="0.6"/>
+  </svg>
+</div>
         <div>
           <div class="app-logo-text">OccasionVault</div>
           <div class="app-logo-sub" id="subtitle">0 occasions</div>
@@ -254,6 +330,7 @@
       <div class="header-actions">
         <button id="notif-hdr-btn" class="hdr-btn" onclick="requestNotif()" style="display:none;">🔔 Enable</button>
         <button id="auth-hdr-btn" class="hdr-btn" onclick="openAuthModal()">👤 Login</button>
+        <div id="profile-avatar" onclick="openProfile()" style="display:none;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary2));cursor:pointer;display:none;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;color:#fff;box-shadow:0 2px 12px rgba(124,107,255,0.4);flex-shrink:0;border:2px solid rgba(255,255,255,0.15);" id="profile-avatar">?</div>
       </div>
     </div>
     <div class="search-bar">
@@ -338,16 +415,19 @@
     </div>
 
     <!-- Recurring toggle -->
-    <div class="form-field" style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
-      <div>
-        <div style="font-size:0.85rem;font-weight:600;">Yearly Recurring</div>
-        <div style="font-size:0.75rem;color:var(--muted);">Repeats every year</div>
+    <div class="form-field">
+      <label class="form-label">Recurrence</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div id="rec-yearly" onclick="setRecurrence('yearly')" style="padding:10px 6px;border-radius:10px;border:1px solid var(--primary);background:rgba(124,107,255,0.12);cursor:pointer;text-align:center;font-size:0.78rem;font-weight:700;color:var(--text);transition:all 0.2s;">
+          <div style="font-size:1.1rem;margin-bottom:3px;">📅</div>Yearly
+        </div>
+        <div id="rec-monthly" onclick="setRecurrence('monthly')" style="padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;text-align:center;font-size:0.78rem;font-weight:700;color:var(--muted);transition:all 0.2s;">
+          <div style="font-size:1.1rem;margin-bottom:3px;">🔄</div>Monthly
+        </div>
+        <div id="rec-once" onclick="setRecurrence('once')" style="padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;text-align:center;font-size:0.78rem;font-weight:700;color:var(--muted);transition:all 0.2s;">
+          <div style="font-size:1.1rem;margin-bottom:3px;">1️⃣</div>One-time
+        </div>
       </div>
-      <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
-        <input type="checkbox" id="form-recurring" checked style="opacity:0;width:0;height:0;"/>
-        <span id="toggle-track" style="position:absolute;inset:0;background:#333;border-radius:12px;transition:0.2s;" onclick="toggleRecurring()"></span>
-        <span id="toggle-thumb" style="position:absolute;left:2px;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:0.2s;pointer-events:none;"></span>
-      </label>
     </div>
 
     <!-- Date -->
@@ -413,6 +493,42 @@
   </div>
 </div>
 
+<!-- Profile Modal -->
+<div id="profile-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeProfile()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:24px;">
+      <div class="profile-avatar-large" id="profile-avatar-large">?</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;" id="profile-name">Guest</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;" id="profile-email">Not signed in</div>
+      <div id="profile-type-badge" style="display:inline-block;margin-top:8px;background:rgba(124,107,255,0.15);color:var(--primary);border-radius:20px;padding:3px 12px;font-size:0.72rem;font-weight:700;letter-spacing:0.05em;">GUEST</div>
+    </div>
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+      <div class="profile-stat"><div class="profile-stat-num" id="stat-total">0</div><div class="profile-stat-label">Total</div></div>
+      <div class="profile-stat"><div class="profile-stat-num" id="stat-upcoming">0</div><div class="profile-stat-label">This Month</div></div>
+      <div class="profile-stat"><div class="profile-stat-num" id="stat-today">0</div><div class="profile-stat-label">Today</div></div>
+    </div>
+    <!-- Actions -->
+    <div class="profile-action" onclick="requestNotif();closeProfile()">
+      <div class="profile-action-icon" style="background:rgba(255,209,102,0.12);">🔔</div>
+      <div><div style="font-size:0.88rem;font-weight:600;">Notification Settings</div><div id="notif-status" style="font-size:0.75rem;color:var(--muted);">Tap to enable reminders</div></div>
+      <span style="margin-left:auto;color:var(--muted);">→</span>
+    </div>
+    <div class="profile-action" onclick="closeProfile();showLoginScreen();" id="profile-switch-account">
+      <div class="profile-action-icon" style="background:rgba(124,107,255,0.12);">🔄</div>
+      <div><div style="font-size:0.88rem;font-weight:600;">Switch Account</div><div style="font-size:0.75rem;color:var(--muted);">Login with a different account</div></div>
+      <span style="margin-left:auto;color:var(--muted);">→</span>
+    </div>
+    <div class="profile-action" onclick="handleLogout();closeProfile();" style="border-color:rgba(255,107,107,0.2);">
+      <div class="profile-action-icon" style="background:rgba(255,107,107,0.1);">🚪</div>
+      <div><div style="font-size:0.88rem;font-weight:600;color:var(--red);">Sign Out</div><div style="font-size:0.75rem;color:var(--muted);">Come back anytime</div></div>
+      <span style="margin-left:auto;color:var(--muted);">→</span>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:0.72rem;color:var(--muted);">OccasionVault v2.0 · Your data is private & secure ☁️</div>
+  </div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -442,15 +558,15 @@ const GUEST_KEY  = "occasionvault-guest";
 const GUEST_AUTH = "occasionvault-guest-session";
 
 const CATEGORIES = [
-  {id:"birthday",  label:"Birthday",    icon:"🎂", color:"#ff6b6b"},
-  {id:"anniversary",label:"Anniversary",icon:"💍", color:"#ff6b9d"},
-  {id:"event",     label:"Event",       icon:"🎉", color:"#7c6bff"},
-  {id:"work",      label:"Work",        icon:"💼", color:"#48dbfb"},
-  {id:"health",    label:"Health",      icon:"🏥", color:"#06d6a0"},
-  {id:"travel",    label:"Travel",      icon:"✈️", color:"#ffd166"},
-  {id:"finance",   label:"Finance",     icon:"💰", color:"#ff9f43"},
-  {id:"festival",  label:"Festival",    icon:"🪔", color:"#ffc312"},
-  {id:"other",     label:"Other",       icon:"📌", color:"#8884aa"},
+  {id:"birthday",  label:"Birthday",    icon:"🎂", color:"#ff6b6b", monthly:false},
+  {id:"anniversary",label:"Anniversary",icon:"💍", color:"#ff6b9d", monthly:false},
+  {id:"event",     label:"Event",       icon:"🎉", color:"#7c6bff", monthly:false},
+  {id:"work",      label:"Work",        icon:"💼", color:"#48dbfb", monthly:true},
+  {id:"health",    label:"Health",      icon:"🏥", color:"#06d6a0", monthly:true},
+  {id:"travel",    label:"Travel",      icon:"✈️", color:"#ffd166", monthly:false},
+  {id:"finance",   label:"Finance",     icon:"💰", color:"#ff9f43", monthly:true},
+  {id:"festival",  label:"Festival",    icon:"🪔", color:"#ffc312", monthly:false},
+  {id:"other",     label:"Other",       icon:"📌", color:"#8884aa", monthly:true},
 ];
 
 const EMOJIS_BY_CAT = {
@@ -490,12 +606,18 @@ function getZodiac(month, day) {
     if (month < z.e[0] || (month === z.e[0] && day <= z.e[1])) return z;
   return null;
 }
-function getDaysUntil(month, day, recurring, fullDate) {
+function getDaysUntil(month, day, recurring, fullDate, recurrenceMode) {
   const today = new Date(); today.setHours(0,0,0,0);
   if (!recurring && fullDate) {
     const d = new Date(fullDate); d.setHours(0,0,0,0);
     const diff = Math.ceil((d - today) / 86400000);
     return diff < 0 ? null : diff;
+  }
+  if (recurrenceMode === "monthly") {
+    // Next occurrence of this day-of-month
+    let next = new Date(today.getFullYear(), today.getMonth(), day);
+    if (next < today) next = new Date(today.getFullYear(), today.getMonth()+1, day);
+    return Math.ceil((next - today) / 86400000);
   }
   let next = new Date(today.getFullYear(), month-1, day);
   if (next < today) next = new Date(today.getFullYear()+1, month-1, day);
@@ -529,8 +651,8 @@ function formatTime(t) {
 }
 function sortOccasions(list) {
   return [...list].sort((a,b) => {
-    const da = getDaysUntil(a.month,a.day,a.recurring,a.fullDate);
-    const db_ = getDaysUntil(b.month,b.day,b.recurring,b.fullDate);
+    const da = getDaysUntil(a.month,a.day,a.recurring,a.fullDate,a.recurrenceMode);
+    const db_ = getDaysUntil(b.month,b.day,b.recurring,b.fullDate,b.recurrenceMode);
     if (da===null && db_===null) return 0;
     if (da===null) return 1; if (db_===null) return -1;
     if (da !== db_) return da - db_;
@@ -642,17 +764,44 @@ function showApp() {
   document.getElementById("notif-hdr-btn").style.display = notifGranted ? "none" : "inline-block";
 }
 function updateHeaderAuth() {
-  const btn = document.getElementById("auth-hdr-btn");
+  const btn    = document.getElementById("auth-hdr-btn");
+  const avatar = document.getElementById("profile-avatar");
   if (currentUser) {
-    const name = currentUser.displayName || currentUser.email || "User";
-    btn.textContent = `🚪 ${name.split(" ")[0]}`;
-    btn.classList.add("danger");
-    btn.onclick = handleLogout;
+    const name = currentUser.displayName || currentUser.email || "Guest";
+    const initials = name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
+    btn.style.display    = "none";
+    avatar.style.display = "flex";
+    avatar.textContent   = initials || "?";
+    avatar.onclick       = openProfile;
   } else {
-    btn.textContent = "👤 Login";
+    btn.style.display    = "inline-block";
+    avatar.style.display = "none";
+    btn.textContent      = "👤 Login";
     btn.classList.remove("danger");
-    btn.onclick = showLoginScreen;
+    btn.onclick          = showLoginScreen;
   }
+}
+function openProfile() {
+  const name  = currentUser?.displayName || currentUser?.email || "Guest";
+  const email = currentUser?.email || (isGuest ? "Guest session" : "Not signed in");
+  const initials = name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2)||"?";
+  document.getElementById("profile-avatar-large").textContent = initials;
+  document.getElementById("profile-name").textContent  = name;
+  document.getElementById("profile-email").textContent = email;
+  document.getElementById("profile-type-badge").textContent = isGuest ? "GUEST" : "☁ SYNCED";
+  document.getElementById("profile-type-badge").style.background = isGuest ? "rgba(255,159,67,0.15)" : "rgba(6,214,160,0.15)";
+  document.getElementById("profile-type-badge").style.color = isGuest ? "var(--orange)" : "var(--green)";
+  // Stats
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cm = today.getMonth()+1;
+  document.getElementById("stat-total").textContent    = occasions.length;
+  document.getElementById("stat-upcoming").textContent = occasions.filter(o=>o.month===cm).length;
+  document.getElementById("stat-today").textContent    = occasions.filter(o=>getDaysUntil(o.month,o.day,o.recurring,o.fullDate,o.recurrenceMode)===0).length;
+  document.getElementById("notif-status").textContent  = notifGranted ? "✅ Notifications enabled" : "Tap to enable reminders";
+  document.getElementById("profile-modal").style.display = "flex";
+}
+function closeProfile() {
+  document.getElementById("profile-modal").style.display = "none";
 }
 
 // ═══════════════════════════════════════════════
@@ -744,8 +893,8 @@ function renderList() {
   document.getElementById("subtitle").textContent = `${occasions.length} occasion${occasions.length!==1?"s":""}${isGuest?" (guest)":" ☁"}`;
 
   // Today
-  const todayItems = list.filter(o => getDaysUntil(o.month,o.day,o.recurring,o.fullDate) === 0);
-  const upcoming   = list.filter(o => { const d=getDaysUntil(o.month,o.day,o.recurring,o.fullDate); return d!==null && d>0; });
+  const todayItems = list.filter(o => getDaysUntil(o.month,o.day,o.recurring,o.fullDate,o.recurrenceMode) === 0);
+  const upcoming   = list.filter(o => { const d=getDaysUntil(o.month,o.day,o.recurring,o.fullDate,o.recurrenceMode); return d!==null && d>0; });
   const todaySec   = document.getElementById("today-section");
   todaySec.style.display = todayItems.length ? "block" : "none";
   document.getElementById("today-list").innerHTML = todayItems.map(o=>`
@@ -765,7 +914,7 @@ function renderList() {
       html += `<div class="month-header">${MONTHS[o.month-1]}</div>`;
       lastMonth = o.month;
     }
-    const days = getDaysUntil(o.month,o.day,o.recurring,o.fullDate);
+    const days = getDaysUntil(o.month,o.day,o.recurring,o.fullDate,o.recurrenceMode);
     const color = catColor(o.cat);
     const zodiac = (o.cat==="birthday") ? getZodiac(o.month,o.day) : null;
     html += `<div class="event-card" onclick="openDetail('${o.id}')" style="animation-delay:${i*0.04}s;border-left:3px solid ${color};">
@@ -776,6 +925,7 @@ function renderList() {
           <span class="cat-pill" style="background:${color}22;color:${color};">${catIcon(o.cat)} ${catLabel(o.cat)}</span>
           ${o.year?`<span class="event-badge">Turning ${getUpcomingAge(parseInt(o.year),o.month,o.day)}</span>`:""}
           ${zodiac?`<span class="zodiac-badge">${zodiac.sym} ${zodiac.name}</span>`:""}
+          ${o.recurrenceMode==="monthly"?'<span class="monthly-badge">🔄 Monthly</span>':''}
           <span class="event-badge">${MONTHS_SHORT[o.month-1]} ${o.day}</span>
         </div>
       </div>
@@ -829,18 +979,29 @@ function updateRemindLabel() {
   const v = document.getElementById("form-remind").value;
   document.getElementById("remind-days-label").textContent = `Remind — ${v} day${v==="1"?"":"s"} before`;
 }
-function toggleRecurring() {
-  isRecurring = !document.getElementById("form-recurring").checked;
-  document.getElementById("form-recurring").checked = isRecurring;
+let recurrenceMode = "yearly"; // yearly | monthly | once
+function setRecurrence(mode) {
+  recurrenceMode = mode;
+  isRecurring = (mode !== "once");
+  ["yearly","monthly","once"].forEach(m => {
+    const el = document.getElementById("rec-"+m);
+    if (!el) return;
+    const active = m===mode;
+    el.style.border       = active ? "1px solid var(--primary)" : "1px solid var(--border)";
+    el.style.background   = active ? "rgba(124,107,255,0.12)" : "rgba(255,255,255,0.03)";
+    el.style.color        = active ? "var(--text)" : "var(--muted)";
+  });
   updateRecurringUI();
 }
 function updateRecurringUI() {
-  const track = document.getElementById("toggle-track");
-  const thumb = document.getElementById("toggle-thumb");
-  track.style.background = isRecurring ? "var(--primary)" : "#333";
-  thumb.style.left = isRecurring ? "22px" : "2px";
-  document.getElementById("full-date-field").style.display = isRecurring ? "none" : "block";
-  document.getElementById("form-month").closest(".form-row").style.display = isRecurring ? "grid" : "none";
+  const showFull  = recurrenceMode === "once";
+  const showMonthDay = !showFull;
+  document.getElementById("full-date-field").style.display = showFull ? "block" : "none";
+  const mr = document.getElementById("form-month")?.closest(".form-row");
+  if (mr) mr.style.display = showMonthDay ? "grid" : "none";
+  // Hide day selector for monthly (only need day-of-month, month auto)
+  const dayWrap = document.getElementById("form-day")?.parentElement;
+  if (dayWrap) dayWrap.style.display = recurrenceMode==="monthly" ? "none" : "block";
 }
 
 function openAddModal() {
@@ -852,10 +1013,10 @@ function openAddModal() {
   document.getElementById("form-year").value = "";
   document.getElementById("form-remind").value = "7"; updateRemindLabel();
   document.getElementById("form-remind-time").value = "09:00";
-  document.getElementById("form-recurring").checked = true;
+  recurrenceMode = "yearly";
   document.getElementById("year-field").style.display = "block";
   document.getElementById("form-error").style.display = "none";
-  updateRecurringUI();
+  setRecurrence("yearly");
   document.getElementById("add-modal").style.display = "flex";
   document.getElementById("fab").style.display = "none";
 }
@@ -897,6 +1058,7 @@ async function handleSave() {
     remind:     parseInt(document.getElementById("form-remind").value),
     remindTime: document.getElementById("form-remind-time").value || "09:00",
     recurring:  isRecurring,
+    recurrenceMode: recurrenceMode,
     fullDate,
     createdAt:  Date.now(),
   };
@@ -913,7 +1075,7 @@ async function handleSave() {
     }
     btn.textContent = "Saved! 🎉";
     setTimeout(()=>{ closeAddModal(); btn.textContent="Save Occasion"; btn.disabled=false; }, 600);
-    if (getDaysUntil(month,day,isRecurring,fullDate)===0) showConfetti();
+    if (getDaysUntil(month,day,isRecurring,fullDate,recurrenceMode)===0) showConfetti();
     checkNotifications();
   } catch(e) {
     showFormError(e.message.includes("timeout") ? "Timed out — check Firestore is created in Firebase Console." : "Failed to save: "+e.message);
@@ -927,7 +1089,7 @@ async function handleSave() {
 function openDetail(id) {
   const o = occasions.find(x => String(x.id)===String(id)); if(!o) return;
   selectedId = id;
-  const days = getDaysUntil(o.month,o.day,o.recurring,o.fullDate);
+  const days = getDaysUntil(o.month,o.day,o.recurring,o.fullDate,o.recurrenceMode);
   const zodiac = (o.cat==="birthday") ? getZodiac(o.month,o.day) : null;
   document.getElementById("d-emoji").textContent = o.emoji;
   document.getElementById("d-name").textContent  = o.name;
@@ -941,6 +1103,8 @@ function openDetail(id) {
   document.getElementById("d-days").style.color   = daysColor(days||0);
   document.getElementById("d-cat").textContent    = `${catIcon(o.cat)} ${catLabel(o.cat)}`;
   document.getElementById("d-remind").textContent = `${o.remind||7} days`;
+  const recMode = o.recurrenceMode||"yearly";
+  document.getElementById("d-cat").textContent = `${catIcon(o.cat)} ${catLabel(o.cat)}${recMode==="monthly"?" 🔄":""}`;
   document.getElementById("d-time").textContent   = formatTime(o.remindTime);
   const noteEl = document.getElementById("d-note");
   noteEl.style.display = o.note ? "block":"none";
