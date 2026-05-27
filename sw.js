@@ -4,7 +4,7 @@
 //           push notifications, periodic sync
 // ═══════════════════════════════════════════════
 
-const CACHE_NAME = "birthday-reminder-v2";
+const CACHE_NAME = "birthday-reminder-v3";
 const BASE = "/Birthday-Reminder";
 
 const ASSETS_TO_CACHE = [
