@@ -4,9 +4,15 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>OccasionVault — Never Miss a Moment</title>
-  <link rel="icon" type="image/svg+xml" href="icon.svg"/>
-  <link rel="apple-touch-icon" href="icon.svg"/>
-  <link rel="manifest" href="manifest.json"/>
+  <link rel="icon" type="image/svg+xml" href="./icon.svg"/>
+  <link rel="apple-touch-icon" href="./icons/icon-192x192.png"/>
+  <link rel="manifest" href="./manifest.json"/>
+  <!-- iOS PWA meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="OccasionVault"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="application-name" content="OccasionVault"/>
   <meta name="theme-color" content="#0d0d1a"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet"/>
@@ -182,6 +188,11 @@
     .detail-box-val{font-weight:700;font-size:0.9rem;}
     .notif-banner{background:linear-gradient(135deg,rgba(255,209,102,0.12),rgba(255,159,67,0.08));border:1px solid rgba(255,209,102,0.25);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin:12px 20px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;}
     .notif-banner:hover{background:rgba(255,209,102,0.15);}
+    /* Install banner */
+    #install-banner{display:none;margin:0 20px 12px;background:linear-gradient(135deg,rgba(124,107,255,0.15),rgba(255,107,157,0.1));border:1px solid rgba(124,107,255,0.3);border-radius:14px;padding:14px 16px;align-items:center;gap:12px;animation:fadeUp 0.4s ease;}
+    #install-banner-ios{display:none;margin:0 20px 12px;background:linear-gradient(135deg,rgba(6,214,160,0.12),rgba(72,219,251,0.08));border:1px solid rgba(6,214,160,0.25);border-radius:14px;padding:14px 16px;animation:fadeUp 0.4s ease;}
+    .install-btn{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.2s;}
+    .install-btn:hover{opacity:0.9;transform:translateY(-1px);}
     #confetti-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:200;display:none;}
     /* Profile modal */
     .profile-avatar-large{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary2));display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;color:#fff;margin:0 auto 12px;box-shadow:0 4px 24px rgba(124,107,255,0.4);border:3px solid rgba(255,255,255,0.15);}
@@ -392,6 +403,31 @@
     <div class="search-bar">
       <span class="search-icon">🔍</span>
       <input id="search-input" oninput="renderList()" placeholder="Search occasions…"/>
+    </div>
+  </div>
+
+  <!-- Install banner (Android/Desktop Chrome) -->
+  <div id="install-banner">
+    <div style="font-size:1.6rem;flex-shrink:0;">📲</div>
+    <div style="flex:1;">
+      <div style="font-weight:700;font-size:0.88rem;">Install OccasionVault</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">Add to home screen for the full app experience</div>
+    </div>
+    <button class="install-btn" onclick="triggerInstall()">Install</button>
+    <span onclick="document.getElementById('install-banner').style.display='none'" style="cursor:pointer;color:var(--muted);font-size:1.1rem;padding:4px;flex-shrink:0;">✕</span>
+  </div>
+
+  <!-- iOS install instructions banner -->
+  <div id="install-banner-ios">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="font-size:1.4rem;">📲</div>
+      <div style="font-weight:700;font-size:0.88rem;">Install on iPhone</div>
+      <span onclick="document.getElementById('install-banner-ios').style.display='none'" style="cursor:pointer;color:var(--muted);margin-left:auto;font-size:1.1rem;">✕</span>
+    </div>
+    <div style="font-size:0.8rem;color:var(--muted);line-height:1.7;">
+      1. Tap the <strong style="color:var(--text);">Share</strong> button <span style="font-size:1rem;">⎋</span> at the bottom of Safari<br/>
+      2. Scroll down and tap <strong style="color:var(--text);">"Add to Home Screen"</strong> <span style="font-size:1rem;">➕</span><br/>
+      3. Tap <strong style="color:var(--text);">Add</strong> — OccasionVault appears as an app!
     </div>
   </div>
 
@@ -1153,6 +1189,11 @@ function showApp() {
   if(sav) sav.style.background = avatarColors[avatarColorIdx];
   document.getElementById("notif-banner").style.display = notifGranted ? "none" : "flex";
   document.getElementById("notif-hdr-btn").style.display = notifGranted ? "none" : "inline-block";
+  // Show install banner if prompt is ready
+  if (deferredInstallPrompt) {
+    const b = document.getElementById("install-banner");
+    if (b) b.style.display = "flex";
+  }
 }
 function updateHeaderAuth() {
   const btn    = document.getElementById("auth-hdr-btn");
@@ -2016,6 +2057,61 @@ function setFilterById(f) {
   renderList();
 }
 
+// ═══════════════════════════════════════════════
+//  INSTALL PROMPT HANDLING
+// ═══════════════════════════════════════════════
+let deferredInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const showBanner = () => {
+    const b = document.getElementById("install-banner");
+    if (b) b.style.display = "flex";
+  };
+  if (document.getElementById("app") && document.getElementById("app").style.display !== "none") {
+    showBanner();
+  } else {
+    setTimeout(showBanner, 2000);
+  }
+});
+
+window.addEventListener("appinstalled", () => {
+  const b = document.getElementById("install-banner");
+  if (b) b.style.display = "none";
+  deferredInstallPrompt = null;
+  setTimeout(() => {
+    fireNotification("✅ OccasionVault Installed!", "App added to your home screen!", "ov-installed");
+  }, 1000);
+});
+
+async function triggerInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const result = await deferredInstallPrompt.userChoice;
+  if (result.outcome === "accepted") {
+    const b = document.getElementById("install-banner");
+    if (b) b.style.display = "none";
+    deferredInstallPrompt = null;
+  }
+}
+
+function checkIOSInstall() {
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true;
+  const isSafari = /Safari/i.test(navigator.userAgent) && !/CriOS|Chrome/i.test(navigator.userAgent);
+  if (isIOS && !isStandalone && isSafari) {
+    if (localStorage.getItem("ov-ios-dismissed") !== "1") {
+      setTimeout(() => {
+        const b = document.getElementById("install-banner-ios");
+        if (b) b.style.display = "block";
+      }, 2500);
+    }
+  }
+}
+
+
+checkIOSInstall();
 initApp();
 </script>
 
