@@ -899,26 +899,21 @@ const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct
 const DAYS_OF_WEEK = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const DAYS_SHORT   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
-function getDayName(month, day, year) {
-  // Get the day name for a given month/day (uses next occurrence if no year)
-  const today = new Date();
-  const y = year || (function(){
-    let d = new Date(today.getFullYear(), month-1, day);
-    if (d < today) d = new Date(today.getFullYear()+1, month-1, day);
-    return d.getFullYear();
-  })();
-  const d = new Date(y, month-1, day);
-  return DAYS_OF_WEEK[d.getDay()];
+function getNextOccurrenceYear(month, day) {
+  // Always returns the year of the NEXT occurrence of this month/day
+  const today = new Date(); today.setHours(0,0,0,0);
+  let d = new Date(today.getFullYear(), month-1, day);
+  if (d < today) d = new Date(today.getFullYear()+1, month-1, day);
+  return d.getFullYear();
 }
-function getDayShort(month, day, year) {
-  const today = new Date();
-  const y = year || (function(){
-    let d = new Date(today.getFullYear(), month-1, day);
-    if (d < today) d = new Date(today.getFullYear()+1, month-1, day);
-    return d.getFullYear();
-  })();
-  const d = new Date(y, month-1, day);
-  return DAYS_SHORT[d.getDay()];
+function getDayName(month, day) {
+  // Day name is ALWAYS based on next occurrence, never birth year
+  const y = getNextOccurrenceYear(month, day);
+  return DAYS_OF_WEEK[new Date(y, month-1, day).getDay()];
+}
+function getDayShort(month, day) {
+  const y = getNextOccurrenceYear(month, day);
+  return DAYS_SHORT[new Date(y, month-1, day).getDay()];
 }
 const DAYS_IN_MONTH = [31,29,31,30,31,30,31,31,30,31,30,31];
 const GUEST_KEY  = "occasionvault-guest";
@@ -1709,7 +1704,7 @@ function renderList() {
           ${o.year?`<span class="event-badge">Turning ${getUpcomingAge(parseInt(o.year),o.month,o.day)}</span>`:""}
           ${zodiac?`<span class="zodiac-badge">${zodiac.sym} ${zodiac.name}</span>`:""}
           ${o.recurrenceMode==="monthly"?'<span class="monthly-badge">🔄 Monthly</span>':''}
-          <span class="event-badge">${getDayShort(o.month,o.day,o.year?parseInt(o.year):null)}, ${MONTHS_SHORT[o.month-1]} ${o.day}</span>
+          <span class="event-badge">${getDayShort(o.month,o.day)}, ${MONTHS_SHORT[o.month-1]} ${o.day}</span>
         </div>
       </div>
       <div class="event-days">
@@ -1881,7 +1876,7 @@ function openDetail(id) {
   const zodiac = (o.cat==="birthday") ? getZodiac(o.month,o.day) : null;
   document.getElementById("d-emoji").textContent = o.emoji;
   document.getElementById("d-name").textContent  = o.name;
-  const dayName = getDayName(o.month, o.day, o.year ? parseInt(o.year) : null);
+  const dayName = getDayName(o.month, o.day);
   document.getElementById("d-date").textContent  = `${dayName}, ${MONTHS[o.month-1]} ${o.day}${o.year?`, ${o.year}`:""}${o.year?` · Age ${getAge(parseInt(o.year),o.month,o.day)}`:""}`;
   const zodiacEl = document.getElementById("d-zodiac");
   if (zodiac) {
