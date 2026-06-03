@@ -1056,6 +1056,25 @@ async function requestNotif() {
     updateNotifUI();
     // Register FCM token for server-side push (works even when app is closed)
     await registerFCMToken();
+    // Register Periodic Background Sync if available
+    if ("serviceWorker" in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        if ("periodicSync" in reg) {
+          const status = await navigator.permissions.query({
+            name: "periodic-background-sync",
+          });
+          if (status.state === "granted") {
+            await reg.periodicSync.register("check-occasions", {
+              minInterval: 12 * 60 * 60 * 1000 // 12 hours
+            });
+            console.log("✅ Periodic Background Sync registered on notification enablement");
+          }
+        }
+      } catch(e) {
+        console.warn("Failed to register periodic sync:", e);
+      }
+    }
     fireNotification(
       "🔔 OccasionVault",
       "Notifications ON! Reminders will fire at your exact set time — even when the app is closed. ✅",
@@ -1108,9 +1127,84 @@ async function registerFCMToken() {
   }
 }
 
-function fireNotification(title, body, tag) {
+let lastSyncedOccasionsJson = null;
+async function syncOccasionsToCache() {
+  try {
+    if (typeof caches === "undefined") return;
+    const data = JSON.stringify(occasions);
+    if (data === lastSyncedOccasionsJson) return;
+    const cache = await caches.open("occasionvault-data");
+    await cache.put("/occasions.json", new Response(data, {
+      headers: { "Content-Type": "application/json" }
+    }));
+    lastSyncedOccasionsJson = data;
+    console.log("✅ Synced occasions to Cache Storage for background notifications.");
+  } catch (e) {
+    console.warn("Failed to sync occasions to cache:", e);
+  }
+}
+
+async function wasNotificationFiredToday(tag) {
+  try {
+    if (typeof caches === "undefined") return false;
+    const cache = await caches.open("occasionvault-data");
+    const response = await cache.match("/fired-notifications.json");
+    const todayStr = new Date().toDateString();
+    if (response) {
+      const fired = await response.json();
+      if (fired[tag] === todayStr) {
+        return true;
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to check fired notifications cache:", e);
+  }
+  return false;
+}
+
+async function markNotificationFiredToday(tag) {
+  try {
+    if (typeof caches === "undefined") return;
+    const cache = await caches.open("occasionvault-data");
+    const response = await cache.match("/fired-notifications.json");
+    const todayStr = new Date().toDateString();
+    let fired = {};
+    if (response) {
+      try { fired = await response.json(); } catch(e){}
+    }
+    fired[tag] = todayStr;
+    
+    // Clean up old dates
+    for (const key in fired) {
+      if (fired[key] !== todayStr) {
+        delete fired[key];
+      }
+    }
+    
+    await cache.put("/fired-notifications.json", new Response(JSON.stringify(fired), {
+      headers: { "Content-Type": "application/json" }
+    }));
+  } catch (e) {
+    console.warn("Failed to mark notification as fired in cache:", e);
+  }
+}
+
+async function fireNotification(title, body, tag) {
   if (Notification.permission !== "granted") return;
   if (localStorage.getItem("ov-notif-suppressed") === "1") return;
+
+  if (tag) {
+    const isRemind = tag.startsWith("ov-today-") || tag.startsWith("ov-remind-") || tag.startsWith("ov-dayof-");
+    if (isRemind) {
+      const fired = await wasNotificationFiredToday(tag);
+      if (fired) {
+        console.log(`Notification with tag ${tag} already fired today.`);
+        return;
+      }
+      await markNotificationFiredToday(tag);
+    }
+  }
+
   try {
     // Use service worker if available (works when tab is in background)
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
@@ -1671,6 +1765,7 @@ function setFilter(f, el) {
 }
 
 function renderList() {
+  syncOccasionsToCache();
   const search = document.getElementById("search-input").value.toLowerCase();
   let list = occasions.filter(o => {
     if (search && !o.name.toLowerCase().includes(search)) return false;
@@ -2293,9 +2388,28 @@ if ("serviceWorker" in navigator) {
       // Register main SW
       const reg = await navigator.serviceWorker.register("./sw.js");
       reg.update();
+      
+      // Register Periodic Sync if supported
+      if ("periodicSync" in reg) {
+        try {
+          const status = await navigator.permissions.query({
+            name: "periodic-background-sync",
+          });
+          if (status.state === "granted") {
+            await reg.periodicSync.register("check-occasions", {
+              minInterval: 12 * 60 * 60 * 1000, // 12 hours
+            });
+            console.log("✅ Periodic Background Sync registered successfully on load");
+          }
+        } catch (err) {
+          console.warn("Periodic sync registration failed:", err);
+        }
+      }
+      
       // Clear old caches
       const keys = await caches.keys();
-      await Promise.all(keys.filter(k => k !== "occasionvault-v6").map(k => caches.delete(k)));
+      await Promise.all(keys.filter(k => k !== "occasionvault-v6" && k !== "occasionvault-data").map(k => caches.delete(k)));
+      
       // Register Firebase Messaging SW (needed for background push)
       await navigator.serviceWorker.register("./firebase-messaging-sw.js");
     } catch(e) { console.warn("SW registration:", e); }
