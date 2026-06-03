@@ -1146,10 +1146,18 @@ async function syncOccasionsToCache() {
 
 async function wasNotificationFiredToday(tag) {
   try {
+    const todayStr = new Date().toDateString();
+    if (currentUser && !isGuest && db) {
+      const doc = await db.collection("users").doc(currentUser.uid).collection("meta").doc("firedNotifications").get();
+      if (doc.exists) {
+        const fired = doc.data();
+        if (fired[tag] === todayStr) return true;
+      }
+      return false;
+    }
     if (typeof caches === "undefined") return false;
     const cache = await caches.open("occasionvault-data");
     const response = await cache.match("/fired-notifications.json");
-    const todayStr = new Date().toDateString();
     if (response) {
       const fired = await response.json();
       if (fired[tag] === todayStr) {
@@ -1157,17 +1165,34 @@ async function wasNotificationFiredToday(tag) {
       }
     }
   } catch (e) {
-    console.warn("Failed to check fired notifications cache:", e);
+    console.warn("Failed to check fired notifications:", e);
   }
   return false;
 }
 
 async function markNotificationFiredToday(tag) {
   try {
+    const todayStr = new Date().toDateString();
+    if (currentUser && !isGuest && db) {
+      const ref = db.collection("users").doc(currentUser.uid).collection("meta").doc("firedNotifications");
+      const doc = await ref.get();
+      let fired = {};
+      if (doc.exists) {
+        fired = doc.data();
+      }
+      fired[tag] = todayStr;
+      
+      // Clean up old dates
+      for (const key in fired) {
+        if (fired[key] !== todayStr) delete fired[key];
+      }
+      await ref.set(fired);
+      return;
+    }
+    
     if (typeof caches === "undefined") return;
     const cache = await caches.open("occasionvault-data");
     const response = await cache.match("/fired-notifications.json");
-    const todayStr = new Date().toDateString();
     let fired = {};
     if (response) {
       try { fired = await response.json(); } catch(e){}
@@ -1185,7 +1210,7 @@ async function markNotificationFiredToday(tag) {
       headers: { "Content-Type": "application/json" }
     }));
   } catch (e) {
-    console.warn("Failed to mark notification as fired in cache:", e);
+    console.warn("Failed to mark notification as fired:", e);
   }
 }
 
