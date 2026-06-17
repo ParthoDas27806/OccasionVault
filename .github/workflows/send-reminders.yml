@@ -2,8 +2,8 @@ name: Send Background Reminders
 
 on:
   schedule:
-    - cron: "0 * * * *"  # Runs at the start of every hour
-  workflow_dispatch:      # Allows manually triggering the run from the GitHub Actions tab
+    - cron: "*/10 * * * *"  # Runs every 10 minutes
+  workflow_dispatch:          # Allows manually triggering from GitHub Actions tab
 
 jobs:
   check-reminders:
