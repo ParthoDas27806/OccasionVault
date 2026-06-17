@@ -1,7 +1,6 @@
-// OccasionVault Background Push Dispatcher v1
+// OccasionVault Background Push Dispatcher v2
 const admin = require("firebase-admin");
 
-// Initialize Firebase Admin using Service Account from Environment Variables
 if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
   console.error("❌ Error: FIREBASE_SERVICE_ACCOUNT environment variable is missing.");
   process.exit(1);
@@ -9,70 +8,63 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 
 try {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 } catch (e) {
   console.error("❌ Error parsing FIREBASE_SERVICE_ACCOUNT:", e.message);
   process.exit(1);
 }
 
-const db = admin.firestore();
+const db        = admin.firestore();
 const messaging = admin.messaging();
 
 const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-const CAT_LABELS = {
-  birthday: "Birthday",
-  anniversary: "Anniversary",
-  event: "Event",
-  work: "Work",
-  health: "Health",
-  travel: "Travel",
-  finance: "Finance",
-  festival: "Festival",
-  other: "Other"
+const CAT_LABELS   = {
+  birthday:"Birthday", anniversary:"Anniversary", event:"Event",
+  work:"Work", health:"Health", travel:"Travel",
+  finance:"Finance", festival:"Festival", other:"Other"
 };
 function catLabel(cat) { return CAT_LABELS[cat] || cat; }
 
-// Helper to get local time components for a given timezone
+// Returns current time components in a given IANA timezone
 function getUserTime(timezone) {
   try {
-    const options = {
-      year: "numeric", month: "numeric", day: "numeric",
-      hour: "numeric", minute: "numeric", second: "numeric",
-      hour12: false,
-      timeZone: timezone
-    };
-    const formatter = new Intl.DateTimeFormat("en-US", options);
-    const parts = formatter.formatToParts(new Date());
-    const dateObj = {};
-    parts.forEach(p => dateObj[p.type] = p.value);
-    
+    const parts = new Intl.DateTimeFormat("en-US", {
+      year:"numeric", month:"numeric", day:"numeric",
+      hour:"numeric", minute:"numeric", second:"numeric",
+      hour12:false, timeZone: timezone
+    }).formatToParts(new Date());
+    const d = {};
+    parts.forEach(p => d[p.type] = p.value);
     return {
-      year: parseInt(dateObj.year),
-      month: parseInt(dateObj.month),
-      day: parseInt(dateObj.day),
-      hour: parseInt(dateObj.hour),
-      minute: parseInt(dateObj.minute)
+      year:   parseInt(d.year),
+      month:  parseInt(d.month),
+      day:    parseInt(d.day),
+      hour:   parseInt(d.hour) % 24,   // guard against "24" midnight edge
+      minute: parseInt(d.minute)
     };
-  } catch (e) {
-    // Fallback to UTC
-    const d = new Date();
-    return {
-      year: d.getUTCFullYear(),
-      month: d.getUTCMonth() + 1,
-      day: d.getUTCDate(),
-      hour: d.getUTCHours(),
-      minute: d.getUTCMinutes()
-    };
+  } catch {
+    const n = new Date();
+    return { year:n.getUTCFullYear(), month:n.getUTCMonth()+1, day:n.getUTCDate(),
+             hour:n.getUTCHours(), minute:n.getUTCMinutes() };
   }
 }
 
-// Helper to calculate days until occasion
+// Total minutes from midnight for easy comparison
+function toMinutes(h, m) { return h * 60 + m; }
+
+// True if the action is running within ±9 min of the scheduled reminder time
+// (10-min cron window, ±9 keeps it tight but safe)
+function isTimeMatch(userTime, remindTime) {
+  const [rh, rm] = remindTime.split(":").map(Number);
+  const target  = toMinutes(rh, rm);
+  const current = toMinutes(userTime.hour, userTime.minute);
+  // Handle midnight wrap-around
+  const diff = Math.abs(current - target);
+  return diff <= 9 || diff >= (24 * 60 - 9);
+}
+
 function getDaysUntil(month, day, recurring, fullDate, recurrenceMode, userTime) {
   const today = new Date(userTime.year, userTime.month - 1, userTime.day, 0, 0, 0, 0);
-  
   if (!recurring && fullDate) {
     const d = new Date(fullDate); d.setHours(0,0,0,0);
     const diff = Math.ceil((d - today) / 86400000);
@@ -90,114 +82,121 @@ function getDaysUntil(month, day, recurring, fullDate, recurrenceMode, userTime)
 
 function formatTime(t) {
   if (!t) return "9:00 AM";
-  const [h,m] = t.split(":").map(Number);
+  const [h, m] = t.split(":").map(Number);
   return `${h%12||12}:${String(m).padStart(2,"0")} ${h>=12?"PM":"AM"}`;
 }
 
 async function run() {
-  console.log("🚀 Starting background occasion reminders scan...");
-  
+  console.log("🚀 OccasionVault reminder scan started at", new Date().toISOString());
+
   const usersSnap = await db.collection("users").get();
-  console.log(`Checking ${usersSnap.size} user account(s)...`);
+  console.log(`👥 ${usersSnap.size} user(s) found`);
 
   for (const userDoc of usersSnap.docs) {
     const uid = userDoc.id;
 
-    // Get FCM token
+    // Get FCM token + timezone
     const tokenDoc = await db.collection("users").doc(uid).collection("meta").doc("fcmToken").get();
-    if (!tokenDoc.exists) continue;
+    if (!tokenDoc.exists) { console.log(`  [${uid}] No FCM token — skipping`); continue; }
     const { token, timezone } = tokenDoc.data();
-    if (!token) continue;
+    if (!token) { console.log(`  [${uid}] Empty FCM token — skipping`); continue; }
 
-    // Get user occasions
+    // Get occasions
     const occasionsSnap = await db.collection("users").doc(uid).collection("occasions").get();
-    if (occasionsSnap.empty) continue;
+    if (occasionsSnap.empty) { console.log(`  [${uid}] No occasions — skipping`); continue; }
 
-    // Get time in user's timezone
-    const userTime = getUserTime(timezone);
-    
-    // Get currently fired notifications map from Firestore
+    const userTime = getUserTime(timezone || "Asia/Kolkata");
+    console.log(`  [${uid}] timezone=${timezone} localTime=${userTime.hour}:${String(userTime.minute).padStart(2,"0")}`);
+
+    // Fired-today dedup map
     const firedRef = db.collection("users").doc(uid).collection("meta").doc("firedNotifications");
     const firedDoc = await firedRef.get();
-    let fired = {};
-    if (firedDoc.exists) {
-      fired = firedDoc.data();
-    }
-
+    let fired = firedDoc.exists ? firedDoc.data() : {};
     const todayStr = `${userTime.year}-${userTime.month}-${userTime.day}`;
 
     for (const oDoc of occasionsSnap.docs) {
-      const o = oDoc.data();
+      const o       = oDoc.data();
       const remindTime = o.remindTime || "09:00";
-      const [rh, rm] = remindTime.split(":").map(Number);
 
-      // Check if it is the current hour of the reminder (GitHub action runs hourly)
-      if (userTime.hour !== rh) {
+      // ── KEY FIX: match within ±9 min window instead of exact hour only ──
+      if (!isTimeMatch(userTime, remindTime)) {
         continue;
       }
 
-      const days = getDaysUntil(o.month, o.day, o.recurring, o.fullDate, o.recurrenceMode, userTime);
+      const days      = getDaysUntil(o.month, o.day, o.recurring, o.fullDate, o.recurrenceMode, userTime);
       if (days === null) continue;
-      
+
       const remindDays = parseInt(o.remind || 7);
-      let title = "";
-      let body = "";
-      let tag = "";
+      let title, body, tag;
 
       if (days === 0) {
-        tag = `ov-today-${oDoc.id}`;
+        tag   = `ov-today-${oDoc.id}`;
         title = `${o.emoji} Today: ${o.name}! 🎉`;
-        body = o.note || `${catLabel(o.cat)} — Don't forget!`;
+        body  = o.note || `${catLabel(o.cat)} — Don't forget!`;
       } else if (days === remindDays) {
-        tag = `ov-remind-${oDoc.id}`;
+        tag   = `ov-remind-${oDoc.id}`;
         title = `${o.emoji} ${o.name} in ${days} day${days===1?"":"s"}!`;
-        body = `${catLabel(o.cat)} · ${MONTHS_SHORT[o.month-1]} ${o.day} · Set for ${formatTime(o.remindTime)}`;
+        body  = `${catLabel(o.cat)} · ${MONTHS_SHORT[o.month-1]} ${o.day} · Reminder at ${formatTime(remindTime)}`;
       } else {
         continue;
       }
 
-      // Check if already fired today in the user's local timezone
+      // Dedup: don't send same notification twice in the same day
       if (fired[tag] === todayStr) {
+        console.log(`  [${uid}] Already sent "${tag}" today — skipping`);
         continue;
       }
 
-      // Send Push Notification
       try {
-        console.log(`Sending notification to ${uid} for "${o.name}" (tag: ${tag})...`);
+        console.log(`  [${uid}] Sending push: "${title}"`);
         await messaging.send({
-          token: token,
-          notification: {
-            title: title,
-            body: body
+          token,
+          notification: { title, body },
+          android: {
+            priority: "high",
+            notification: {
+              sound:       "default",
+              channelId:   "occasion-reminders",
+              clickAction: "FLUTTER_NOTIFICATION_CLICK"
+            }
           },
-          data: {
-            tag: tag,
-            url: "./"
-          }
+          webpush: {
+            headers: { Urgency: "high" },
+            notification: {
+              title, body,
+              icon:  "./icons/icon-192x192.png",
+              badge: "./icons/icon-96x96.png",
+              vibrate: [200, 100, 200],
+              tag,
+              renotify: true
+            },
+            fcmOptions: { link: "https://parthodas27806.github.io/OccasionVault/" }
+          },
+          data: { tag, url: "https://parthodas27806.github.io/OccasionVault/" }
         });
-        
-        // Log fired state in Firestore
         fired[tag] = todayStr;
-        console.log(`✅ Push sent successfully for "${o.name}"!`);
+        console.log(`  ✅ Push sent for "${o.name}"`);
       } catch (err) {
-        console.warn(`⚠️ Failed to send push to user ${uid} for "${o.name}":`, err.message);
+        console.warn(`  ⚠️ Push failed for "${o.name}": ${err.message}`);
+        // If token is stale/invalid, remove it so we don't keep trying
+        if (err.code === "messaging/registration-token-not-registered" ||
+            err.code === "messaging/invalid-registration-token") {
+          await db.collection("users").doc(uid).collection("meta").doc("fcmToken").delete();
+          console.warn(`  🗑️ Stale FCM token removed for user ${uid}`);
+        }
       }
     }
 
-    // Clean up fired history older than today and update Firestore
-    let updatedFired = {};
-    for (const key in fired) {
-      if (fired[key] === todayStr) {
-        updatedFired[key] = todayStr;
-      }
-    }
-    await firedRef.set(updatedFired);
+    // Save updated fired map (only keep today's entries)
+    const cleanFired = {};
+    for (const k in fired) { if (fired[k] === todayStr) cleanFired[k] = todayStr; }
+    await firedRef.set(cleanFired);
   }
-  
-  console.log("🏁 Background occasion scan completed.");
+
+  console.log("🏁 Scan complete at", new Date().toISOString());
 }
 
 run().then(() => process.exit(0)).catch(err => {
-  console.error("❌ Critical scan failure:", err);
+  console.error("❌ Fatal error:", err);
   process.exit(1);
 });
